@@ -1,0 +1,17 @@
+{
+  "name": "backbone-fiber",
+  "version": "0.0.1",
+  "ignore": [
+    "bower_components",
+    "node_modules",
+    "src"
+  ],
+  "dependencies": {
+    "basejs": "https://github.com/bseth99/basejs.git",
+    "requirejs": "latest",
+    "requirejs-text": "latest",
+    "jquery": "latest",
+    "backbone-amd": "latest",
+    "lodash": "latest"
+  }
+}
