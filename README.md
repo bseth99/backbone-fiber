@@ -12,9 +12,10 @@ relationship that mirrors the structure of the DOM
   - All clean up is automatic regardless of how you remove something
  
 
-Read the blog post that provides some background and discusses the core concepts of the design.
+Read the (blog post)[http://www.benknowscode.com/2013/08/extending-backbone-for-building-better-web-applications.html] 
+that provides some background and discusses the core concepts of the design.
 
-Look at the demo.  It uses most of the features and shows the structure of a project.
+Look at (the demo)[http://bseth99.github.io/backbone-fiber-demo/].  It uses most of the features and shows the structure of a project.
 
 Usage
 ---------------
