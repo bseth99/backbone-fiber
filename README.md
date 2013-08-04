@@ -20,17 +20,17 @@ Look at [the demo](http://bseth99.github.io/backbone-fiber-demo/).  It uses most
 Usage
 ---------------
 
-The easiest way to get started using Fiber will be to use the Yeoman generator.  I'm writing it ...
-
+The easiest way to get started using Fiber will be to use the [Yeoman generator](https://github.com/bseth99/generator-backbone-fiber).  I'm writing it ...
+      
+    npm install -g yo
+    npm install -g https://github.com/bseth99/generator-backbone-fiber
     yo backbone-fiber
-    npm install
-    bower install
     
 This will setup all the dependencies, create directories, and generate a index.html, config.js, and main.js to get you started.  Your next step will be to write a view.  Yeoman can help with that too:
 
-    yo backbone-fiber view:myview
+    yo backbone-fiber:view myview
     
-Check out the generator project page for a full reference of commands.
+Check out the [generator project page](https://github.com/bseth99/generator-backbone-fiber) for a full reference of commands and how it can make your workflow better.
 
 If you'd like to do things your way, you can use Bower:
 
@@ -103,7 +103,8 @@ Todo
 
   - Allow other templating engines
   - Add comments to the code.  
-  - I had more but forgot :( 
+  - Revisit waitFor() and findChild()
+  - Confirm several other use cases work with it
   
 Release History
 ---------------
