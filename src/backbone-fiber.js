@@ -130,6 +130,8 @@
       parent: null,
       children: null,
 
+      renderedOnce: false,
+
       connect: function( target, options ) {
          var $el, wait,
              self = this,
@@ -211,9 +213,10 @@
                data = this.dataSerialized();
                isa = data && $.isArray( data );
 
-               if ( data && ( ( isa && data.length > 0 ) || !isa ) )
+               if ( this.renderedOnce && data || ( !this.renderedOnce && ( ( isa && data.length > 0 ) || !isa ) ) )
                {
                   this.$el.empty().html( this.template( data ) );
+                  this.renderedOnce = true;
 
                   this.$el.children().find( '[data-view]' ).each( function() {
                      connect( this );
