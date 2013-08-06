@@ -137,15 +137,17 @@ bound to a child view instance.
    - returns a promise which will be resolved in the scope of the parent view and
    pass the new view instance as the argument to the callback function.
 
-      var popover = this.findChild( 'popover' );
-
-      if ( popover ) {
-         popover.show( this.source.get( ui.data.item ), ui.data.row );
-      } else {
-         this.connect( 'popover' ).done(function( popover ) {
-            popover.show( this.source.get( ui.data.item ), ui.data.row );
-         });
-      }
+```
+  var popover = this.findChild( 'popover' );
+        
+  if ( popover ) {
+    popover.show( this.source.get( ui.data.item ), ui.data.row );
+  } else {
+    this.connect( 'popover' ).done(function( popover ) {
+      popover.show( this.source.get( ui.data.item ), ui.data.row );
+    });
+  }
+```
 
 In this example, connect is used add a popover element in the DOM if its not already there.  Once
 loaded, the popover instance show() method is called with the data and relative element to position
@@ -158,11 +160,13 @@ certain logic.  Calls the callback function once eveything has loaded in the chi
 
    - callback [ Function ] - Function to call once all the view have loaded.
 
-      this.waitFor( ['sidebar', 'content'], function() {
-         self.source.load( ui.data.action ).done(function() {
-            self.ready.call( self );
-         });
-      });
+```
+  this.waitFor( ['sidebar', 'content'], function() {
+     self.source.load( ui.data.action ).done(function() {
+         self.ready.call( self );
+     });
+  });
+```
 
 The above example used waitFor to ensure both the sidebar and content views have finished loading before
 running the function that will initialize their data sources.
@@ -175,15 +179,16 @@ running the function that will initialize their data sources.
    - returns the view instance or null if it can't be found.  If more than one match is located,
      returns the first match.  Use findChildren to retrieve an array of all the matching children of
      the same type.
-   
-      this.findChild( 'content' ).collection.reset(
 
-         this.source.filter( function( model ) {
+```
+  this.findChild( 'content' ).collection.reset(
 
-            ...
-         })
-      );
-            
+    this.source.filter( function( model ) {
+      ...
+    })
+  );
+```
+
 This example gets the content view instance and resets its collection.  If there's a possibility the 
 view is not connected yet, check the return value and connect it, or use waitFor if you know it will load
 and might not be ready yet.
