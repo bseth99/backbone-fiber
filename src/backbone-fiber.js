@@ -8,6 +8,7 @@
     }
 }(this, function ($, _, Backbone, Base) {
 
+   // Replace and enhance
    Backbone.View.extend = Base.extend;
    Backbone.View.mix = Base.mix;
 
@@ -32,8 +33,21 @@
 
    Backbone.Fiber = Fiber = {
 
+      /**
+      *  Set the base path to find views relative to the RequireJS
+      *  basePath.  View module IDs will be relative to this location.
+      *  For example, if the basePath is scripts and views are in the
+      *  scripts/views folder then a view file named shell.js will be
+      *  identified by RequireJS as views/shell but Fiber will index it
+      *  as shell.
+      */
       viewPath: 'views/',
 
+      /**
+      *  Given an element from the DOM, find the closest element (either
+      *  it or one of its parents) that has a view instance bound and return
+      *  that instance.
+      */
       getViewFromEl: function( el ) {
          var $el = $( el ),
              dataCid = $el.attr( 'data-cid' ) || $el.closest( '[data-cid]' ).attr( 'data-cid' );
@@ -41,17 +55,28 @@
          if ( dataCid ) return _view_inst[dataCid];
       },
 
+      /**
+      *  Lookup a view instance from its cid
+      */
       getViewFromCid: function( cid ) {
 
          return _view_inst[cid];
       },
 
+      /**
+      *  Get the DOM element a view instance is bound to based on its
+      *  cid
+      */
       getElFromCid: function( cid ) {
 
          if ( _view_inst[cid] )
             return _view_inst[cid].$el;
       },
 
+      /**
+      *  Return the promise for a view definition.  Only valid while loading,
+      *  otherwise, returns nothing.
+      */
       getPromise: function( view ) {
 
          if ( _view_loading[view] )
@@ -59,6 +84,10 @@
       }
    }
 
+   /**
+   *  Wraps RequireJS and loads view modules with their template files.  Modifies the
+   *  prototype with the view module name and the pre-compiled template function.
+   */
    function load( target ) {
 
       var dfd = $.Deferred();
@@ -84,6 +113,10 @@
       return dfd.promise();
    }
 
+   /**
+   *  View factory method.  Creates instance, sets up the parent/child
+   *  relationship and renders the view.
+   */
    function create( view, $el, options ) {
 
       var inst = new view(_.extend( options, { el: $el[0] } )),
@@ -103,6 +136,11 @@
       return inst;
    }
 
+   /**
+   *  Finds the binding on the element, loads the view definition, and
+   *  then creates the instance of the view with the passed in options and
+   *  attaches it to the DOM element.
+   */
    function connect( el, opts ) {
 
       var options = opts || {},
@@ -125,13 +163,54 @@
 
    Backbone.View.mix([{
 
+
+      /**
+      *  load() will attach the compiled template to the
+      *  prototype of the loaded view.  No need to do anything
+      *  with this.
+      */
       template: null,
 
+      /**
+      *  The top-most view will be null, all others will have the
+      *  cid of the nearest parent view instance.  create() sets this
+      *  value when generating the instance.
+      */
       parent: null,
+
+      /**
+      *  As each child is added, the parent view gets a reference to the
+      *  cid.  create() also manages adding this while View.removeChild
+      *  removes the reference when a child view removes itself.
+      */
       children: null,
 
+      /**
+      *  Flag to determine if its the first render pass.  Changes the
+      *  behavior of render() and how it responds to empty data sets.
+      */
       renderedOnce: false,
 
+      /**
+      *  Enables dynamically adding new DOM elements that will be
+      *  bound to a child view instance.
+      *
+      *  target [ String | DOMElement | jQuery Object ]
+      *
+      *     A string value represents the name of the view to bind to the DOM node.
+      *     factory() is used to generate the new element with the data-view attribute
+      *     set.  Pass a DOMElement or jQuery object to control how the node is inserted
+      *     into the DOM (or override factory() if its the primary way to add nodes)
+      *
+      *  options [ Object ]
+      *
+      *     This hash will be passed to the view constructor and can be anything you'd
+      *     normally pass to a view when creating an instance.  This can include the model
+      *     or collection object.
+      *
+      *  returns a promise which will be resolved in the scope of the parent view and
+      *  pass the new view instance as the argument to the callback function.
+      */
       connect: function( target, options ) {
          var $el, wait,
              self = this,
@@ -154,6 +233,19 @@
          return dfd.promise();
       },
 
+      /**
+      *  Helper function to ensure multiple views have finished loading before running
+      *  certain logic.  Calls the callback function once eveything has loaded in the
+      *  children parameter.
+      *
+      *  children [ Array ]
+      *
+      *     Array of view names that should be children of the calling view instance.
+      *
+      *  callback [ Function ]
+      *
+      *     Function to call once all the view have loaded.
+      */
       waitFor: function( children, callback ) {
 
          var self = this,
@@ -164,10 +256,19 @@
          });
       },
 
+      /**
+      *  Used by connect() to create DOM nodes.  Override to generate something
+      *  different.
+      */
       factory: function( vmid ) {
          return $('<div>').attr( 'data-view', vmid ).appendTo( this.$el );
       },
 
+      /**
+      *  Redefined the standard initialize view function.  Don't override this
+      *  unless you know what you're doing.  Override setup() instead to add your
+      *  own custom creation logic.
+      */
       initialize: function( options ) {
 
          this.$el.on( 'destroyed', _.bind( this.remove, this ) );
@@ -179,6 +280,12 @@
          this.trigger('created');
       },
 
+      /**
+      *  Internal function to examine the events hash and
+      *  look for *.data keys.  Will bind the function identified in the value
+      *  to the whatever is defined by the data() function (as long as it has a
+      *  trigger function)..
+      */
       bindData: function() {
 
          var self = this,
@@ -199,8 +306,16 @@
          }
       },
 
+      /**
+      *  Override this as necessary
+      */
       setup: $.noop,
 
+      /**
+      *  Leave this alone.  Use before/after render callbacks instead or bind to the
+      *  rendering/rendered events.  Upon rendering, the function will look for children
+      *  with a data-view attribute and start connecting views recursively.
+      */
       render: function() {
 
          var data, isa;
@@ -230,9 +345,20 @@
 
       },
 
+      /**
+      *  Add logic that should happen before rendering.  Return false to cancel rendering
+      */
       beforeRender: $.noop,
+
+      /**
+      *  Add post rendering logic here.
+      */
       afterRender: $.noop,
 
+      /**
+      *  Default logic to decide what defines the data object used by the
+      *  view.  Override if you need something special.
+      */
       data: function() {
 
          if ( this.model )
@@ -243,6 +369,9 @@
             return {};
       },
 
+      /**
+      *  Ensures the data is a object
+      */
       dataSerialized: function() {
 
          var dm = this.data();
@@ -254,6 +383,10 @@
 
       },
 
+      /**
+      *  Overwrites the normal view remove function.  Tells the parent
+      *  to clean up which will call this again to finish cleaning up.
+      */
       remove: function() {
 
          this.destroy();
@@ -273,6 +406,9 @@
          this._superStop();
       },
 
+      /**
+      *   Put any custom cleanup logic here
+      */
       destroy: $.noop,
 
       trigger: function( topic, data ) {
@@ -282,11 +418,17 @@
             this._superStop();
       },
 
+      /**
+      *  Used internally to set the parent attribute on the view instance.
+      */
       setParent: function( view ) {
          this.parent = null;
          if ( view ) this.parent = view.cid;
       },
 
+      /**
+      *  Used internally to add a child view instance
+      */
       addChild: function( view ) {
 
          if ( !_.contains( view.cid, this.children ) ) {
@@ -294,6 +436,9 @@
          }
       },
 
+      /**
+      *  Used internally to remove a child and ensure its cleanup.
+      */
       removeChild: function( view ) {
 
          var idx = _.indexOf( this.children, view.cid );
@@ -305,6 +450,9 @@
          }
       },
 
+      /**
+      *  Helper to retrive an array of all the child view instances
+      */
       allChildren: function() {
 
          return (
@@ -314,6 +462,9 @@
          );
       },
 
+      /**
+      *  Helper to return an array of child view instance of a given name
+      */
       findChildren: function( type ) {
 
          return (
@@ -329,6 +480,9 @@
 
       },
 
+      /**
+      *  Helper to return view instance based on the view name or jQuery element.
+      */
       findChild: function( target ) {
 
          var view = null;
