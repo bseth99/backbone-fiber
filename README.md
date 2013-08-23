@@ -206,4 +206,5 @@ Release History
 ---------------
 
   v0.0.1 - Epoch
+  v0.0.2 - Fix recursive connect to allow direct descendants
   
