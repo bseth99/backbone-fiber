@@ -397,6 +397,18 @@
             return {};
       },
 
+
+      setData: function( data ) {
+
+         if ( data.model )
+            this.model = data.model;
+         else if ( data.collection )
+            this.collection = data.collection;
+
+         this.bindData();
+
+      }, 
+
       /**
       *  Ensures the data is a object
       */
