@@ -405,6 +405,8 @@
          else if ( data.collection )
             this.collection = data.collection;
 
+         this.bindData();
+
       }, 
 
       /**
