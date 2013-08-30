@@ -26,8 +26,6 @@
  *
  */
 
- // Additional changes made care of Joel Olson, because he's awesome(?)
-
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD.
@@ -398,6 +396,16 @@
          else
             return {};
       },
+
+
+      setData: function( data ) {
+
+         if ( data.model )
+            this.model = data.model;
+         else if ( data.collection )
+            this.collection = data.collection;
+
+      }, 
 
       /**
       *  Ensures the data is a object
