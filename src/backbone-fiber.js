@@ -26,6 +26,8 @@
  *
  */
 
+ // Additional changes made care of Joel Olson, because he's awesome(?)
+
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD.
