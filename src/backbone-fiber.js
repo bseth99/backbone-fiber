@@ -400,13 +400,17 @@
 
       setData: function( data ) {
 
+         var dm = null;
+
          if ( data.model )
-            this.model = data.model;
+            this.model = dm = data.model;
          else if ( data.collection )
-            this.collection = data.collection;
+            this.collection = dm = data.collection;
 
          this.bindData();
 
+         if (dm && dm.trigger) {dm.trigger('ready');}
+         return this;
       }, 
 
       /**
