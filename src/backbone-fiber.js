@@ -424,7 +424,7 @@
 
          this.bindData();
 
-         if (dm && dm.trigger) {dm.trigger('ready');}
+         if (dm && dm.trigger) {dm.trigger('ready', dm);}
          return this;
       }, 
 
