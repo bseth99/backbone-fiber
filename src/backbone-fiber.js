@@ -407,7 +407,7 @@
 
          this.bindData();
 
-      }, 
+      },
 
       /**
       *  Ensures the data is a object
@@ -429,16 +429,17 @@
       */
       remove: function() {
 
-         this.destroy();
-
          if ( this.parent ) {
 
            _view_inst[this.parent].removeChild( this );
 
          } else {
 
+            this.destroy();
             this.trigger('removed');
             this.stopListening();
+            this.$el.off( 'destroyed' );
+            this.$el.remove();
 
             delete _view_inst[this.cid];
          }
