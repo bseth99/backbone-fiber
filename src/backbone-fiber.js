@@ -302,7 +302,7 @@
          this.$el.on( 'destroyed', _.bind( this.remove, this ) );
 
          this.children = [];
-         this.setup();
+         this.setup( options );
          this.bindData();
 
          this.trigger('created');
