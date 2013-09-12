@@ -309,6 +309,14 @@
       },
 
       /**
+      *  Internal function to unbind any listenTos on the data
+      *  Any custom setData functions need to call this or write their own version.
+      */
+      unbindData: function() {
+         this.stopListening( this.data() );
+      },
+
+      /**
       *  Internal function to examine the events hash and
       *  look for *.data keys.  Will bind the function identified in the value
       *  to the whatever is defined by the data() function (as long as it has a
@@ -397,16 +405,27 @@
             return {};
       },
 
+      /**
+      *  Default logic to set data on the view.  Takes a hash with either model or collection set to the new data value.
+      *  Any custom functions must ensure they properly bind and unbind data.  The trigger is optional.
+      *  Returns itself for chaining.
+      */
 
       setData: function( data ) {
 
+         var dm = null;
+
+         this.unbindData();
+
          if ( data.model )
-            this.model = data.model;
+            this.model = dm = data.model;
          else if ( data.collection )
-            this.collection = data.collection;
+            this.collection = dm = data.collection;
 
          this.bindData();
 
+         if (dm && dm.trigger) {dm.trigger('ready', dm);}
+         return this;
       },
 
       /**
