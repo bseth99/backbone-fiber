@@ -205,7 +205,7 @@ Todo
 Release History
 ---------------
 
-  v0.0.3 - Add setData() to enable changing the collection/model after initialization
-  v0.0.2 - Fix recursive connect to allow direct descendants
-  v0.0.1 - Epoch
+  - v0.0.3 - Add setData() to enable changing the collection/model after initialization 
+  - v0.0.2 - Fix recursive connect to allow direct descendants 
+  - v0.0.1 - Epoch 
   
