@@ -25,7 +25,7 @@ The easiest way to get started using Fiber will be to use the
 [Yeoman generator](https://github.com/bseth99/generator-backbone-fiber):
       
     npm install -g yo
-    npm install -g https://github.com/bseth99/generator-backbone-fiber
+    sudo npm install -g git://github.com/bseth99/generator-backbone-fiber.git
     yo backbone-fiber
     
 This will setup all the dependencies, create directories, and generate a index.html, config.js, and main.js to get 
