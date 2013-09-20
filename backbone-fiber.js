@@ -302,10 +302,18 @@
          this.$el.on( 'destroyed', _.bind( this.remove, this ) );
 
          this.children = [];
-         this.setup();
+         this.setup( options );
          this.bindData();
 
          this.trigger('created');
+      },
+
+      /**
+      *  Internal function to unbind any listenTos on the data
+      *  Any custom setData functions need to call this or write their own version.
+      */
+      unbindData: function() {
+         this.stopListening( this.data() );
       },
 
       /**
@@ -397,17 +405,28 @@
             return {};
       },
 
+      /**
+      *  Default logic to set data on the view.  Takes a hash with either model or collection set to the new data value.
+      *  Any custom functions must ensure they properly bind and unbind data.  The trigger is optional.
+      *  Returns itself for chaining.
+      */
 
       setData: function( data ) {
 
+         var dm = null;
+
+         this.unbindData();
+
          if ( data.model )
-            this.model = data.model;
+            this.model = dm = data.model;
          else if ( data.collection )
-            this.collection = data.collection;
+            this.collection = dm = data.collection;
 
          this.bindData();
 
-      }, 
+         if (dm && dm.trigger) {dm.trigger('ready', dm);}
+         return this;
+      },
 
       /**
       *  Ensures the data is a object
@@ -429,16 +448,17 @@
       */
       remove: function() {
 
-         this.destroy();
-
          if ( this.parent ) {
 
            _view_inst[this.parent].removeChild( this );
 
          } else {
 
+            this.destroy();
             this.trigger('removed');
             this.stopListening();
+            this.$el.off( 'destroyed' );
+            this.$el.remove();
 
             delete _view_inst[this.cid];
          }
