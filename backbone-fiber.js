@@ -473,8 +473,8 @@
 
       trigger: function( topic, data ) {
 
-         //console.log( this.instanceOf, arguments );
-         if ( !this.$el.trigger( topic+'.'+this.instanceOf, { view: this, data: data || {} } ) )
+         //console.log( this.instanceOf, arguments ); //+'.'+this.instanceOf
+         if ( !this.$el.trigger( topic, { view: this, data: data || {} } ) )
             this._superStop();
       },
 
