@@ -300,7 +300,8 @@
       initialize: function( options ) {
 
          this.$el.on( 'destroyed', _.bind( this.remove, this ) );
-
+		 this.options = options || {};
+		 
          this.children = [];
          this.setup( options );
          this.bindData();
