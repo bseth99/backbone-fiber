@@ -439,7 +439,7 @@
          var dm = this.data();
 
          if ( dm.toJSON )
-            return dm.toJSON();
+            return dm.toJSON({ computedFields: true });
          else
             return dm;
 
