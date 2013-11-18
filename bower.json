@@ -1,6 +1,6 @@
 {
   "name": "backbone-fiber",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "ignore": [
     "bower_components",
     "node_modules",

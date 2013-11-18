@@ -314,7 +314,9 @@
       *  Any custom setData functions need to call this or write their own version.
       */
       unbindData: function() {
-         this.stopListening( this.data() );
+         var dm = this.data();
+         if ( dm.trigger )
+            this.stopListening( dm );
       },
 
       /**
@@ -437,7 +439,7 @@
          var dm = this.data();
 
          if ( dm.toJSON )
-            return dm.toJSON();
+            return dm.toJSON({ computedFields: true });
          else
             return dm;
 
