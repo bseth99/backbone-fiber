@@ -584,6 +584,16 @@
          }
 
          return view;
+      },
+      
+      /**
+      *  Determines if an element is in my view and not a child's view.
+      */
+      isMyElement: function( el ) {
+         var $el = (el instanceof $ ? el : $(el));
+         
+         return $el.parents('[data-view]').first().attr('data-cid') == this.cid;
+         
       }
 
    }]);
