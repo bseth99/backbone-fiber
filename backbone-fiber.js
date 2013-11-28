@@ -146,22 +146,29 @@
    *  relationship and renders the view.
    */
    function create( view, $el, options ) {
-
+   
       var inst = new view(_.extend( options, { el: $el[0] } )),
-          parent;
+          parent, fizzle = false;
 
       $el.attr( 'data-cid', inst.cid );
       _view_inst[inst.cid] = inst;
 
       parent = $el.parents( '[data-view]' ).first();
+      
       if ( parent.length > 0 ) {
          parent = parent.attr( 'data-cid' );
-         _view_inst[parent].addChild( inst );
-         inst.setParent( _view_inst[parent] );
+         if ( _view_inst[parent] ) {
+            _view_inst[parent].addChild( inst );
+            inst.setParent( _view_inst[parent] );
+         } else {
+            fizzle = true;
+            inst.remove();
+         }
       }
 
-      inst.render();
+      if (!fizzle) { inst.render(); }
       return inst;
+   
    }
 
    /**
@@ -219,6 +226,13 @@
       */
       renderedOnce: false,
 
+      /**
+      *  Flag to force the view to render even if it has an empty collection
+      *  and has not renderedOnce
+      */
+      forceRender: false,
+      
+      
       /**
       *  Enables dynamically adding new DOM elements that will be
       *  bound to a child view instance.
@@ -367,7 +381,7 @@
                data = this.dataSerialized();
                isa = data && $.isArray( data );
 
-               if ( this.renderedOnce && data || ( !this.renderedOnce && ( ( isa && data.length > 0 ) || !isa ) ) )
+               if ( ( this.forceRender || this.renderedOnce ) && data || ( !this.renderedOnce && ( ( isa && data.length > 0 ) || !isa ) ) )
                {
                   this.$el.empty().html( this.template( data ) );
                   this.renderedOnce = true;
@@ -427,7 +441,7 @@
 
          this.bindData();
 
-         if (dm && dm.trigger) {dm.trigger('ready', dm);}
+         if (dm && dm.trigger) { dm.trigger( 'ready', dm, this );}
          return this;
       },
 
@@ -534,7 +548,7 @@
             _.compact(
                _.map( this.children, function( cid ) {
                   var view;
-                  if ( (view = Fiber.getViewFromCid( this.children[i] )) && view.instanceOf == type )
+                  if ( (view = Fiber.getViewFromCid( cid )) && view.instanceOf == type )
                      return view;
                })
             )
@@ -570,6 +584,16 @@
          }
 
          return view;
+      },
+      
+      /**
+      *  Determines if an element is in my view and not a child's view.
+      */
+      isMyElement: function( el ) {
+         var $el = (el instanceof $ ? el : $(el));
+         
+         return $el.parents('[data-view]').first().attr('data-cid') == this.cid;
+         
       }
 
    }]);
