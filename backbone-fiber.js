@@ -423,11 +423,25 @@
       },
 
       /**
+      *  Default logic to unset data and allow for an event to trigger
+      */
+      
+      clearData: function() {
+         var dm = this.data();
+         this.unbindData();
+         this.model = null;
+         this.collection = null;
+         this.trigger('undata', dm );
+         return this;
+         
+      },
+      
+      /**
       *  Default logic to set data on the view.  Takes a hash with either model or collection set to the new data value.
       *  Any custom functions must ensure they properly bind and unbind data.  The trigger is optional.
       *  Returns itself for chaining.
       */
-
+      
       setData: function( data ) {
 
          var dm = null;
