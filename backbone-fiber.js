@@ -606,7 +606,7 @@
       isMyElement: function( el ) {
          var $el = (el instanceof $ ? el : $(el));
          
-         return $el.parents('[data-view]').first().attr('data-cid') == this.cid;
+         return ( $el.attr('data-cid') == this.cid || $el.parents('[data-view]').first().attr('data-cid') == this.cid );
          
       }
 
