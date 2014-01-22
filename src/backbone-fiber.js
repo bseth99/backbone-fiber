@@ -110,15 +110,15 @@
          if ( _view_loading[view] )
             return _view_loading[view];
       },
-      
-      
+
+
       /**
       *  Used to determine if a target is loaded
       *  returns true if it's loading, false if it's loaded, and null if the dataview isn't even registered
       */
       isLoaded: function( target ) {
          target = ( target instanceof $ ) ? target.attr( 'data-view' ) || target.closest( '[data-view]' ).attr( 'data-view' ) : target;
-         
+
          if ( _view_loading[target] )
             return false;
          else
@@ -163,7 +163,7 @@
    *  relationship and renders the view.
    */
    function create( view, $el, options ) {
-   
+
       var inst = new view(_.extend( options, { el: $el[0] } )),
           parent, fizzle = false;
 
@@ -171,7 +171,7 @@
       _view_inst[inst.cid] = inst;
 
       parent = $el.parents( '[data-view]' ).first();
-      
+
       if ( parent.length > 0 ) {
          parent = parent.attr( 'data-cid' );
          if ( _view_inst[parent] ) {
@@ -188,7 +188,7 @@
 
       if (!fizzle) { inst.render(); }
       return inst;
-   
+
    }
 
    /**
@@ -251,8 +251,8 @@
       *  and has not renderedOnce
       */
       forceRender: false,
-      
-      
+
+
       /**
       *  Enables dynamically adding new DOM elements that will be
       *  bound to a child view instance.
@@ -278,7 +278,7 @@
              self = this,
              dfd = $.Deferred(),
              meview = null;
-             
+
          if ( typeof( target ) == 'string' )
             $el = this.factory( target );
          else
@@ -288,13 +288,13 @@
 
          if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) )
             wait.done(function( view ) {
-               if ( meview = Fiber.getViewFromEl( $el ) ) 
+               if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                   dfd.resolveWith( self, [meview] );
                else
                   dfd.rejectWith( self );
             });
          else
-            if ( meview = Fiber.getViewFromEl( $el ) )
+            if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                dfd.resolveWith( this, [ meview ] );
             else
                dfd.rejectWith( this );
@@ -452,7 +452,7 @@
       /**
       *  Default logic to unset data and allow for an event to trigger
       */
-      
+
       clearData: function() {
          var dm = this.data();
          this.unbindData();
@@ -460,15 +460,15 @@
          this.collection = null;
          this.trigger('undata', dm );
          return this;
-         
+
       },
-      
+
       /**
       *  Default logic to set data on the view.  Takes a hash with either model or collection set to the new data value.
       *  Any custom functions must ensure they properly bind and unbind data.  The trigger is optional.
       *  Returns itself for chaining.
       */
-      
+
       setData: function( data ) {
 
          var dm = null;
@@ -634,7 +634,7 @@
       isChildLoaded: function( target ) {
          return Fiber.isLoaded( target );
       },
-      
+
       /**
       * Sometimes we know an el should be a child, but it's possible it could still be loading before it's officially added
       * this function handles the logic to remove the view if it exists otherwise it just removes the $el
@@ -642,21 +642,21 @@
       purgeChildEl: function( el ) {
          var $el = (el instanceof $ ? el : $(el)),
              child;
-         
+
          if ( this.isChildLoaded( $el ) && ( child = this.findChild( $el )))
             child.remove();
          else
             $el.remove();
       },
-      
+
       /**
       *  Determines if an element is in my view and not a child's view.
       */
       isMyElement: function( el ) {
          var $el = (el instanceof $ ? el : $(el));
-         
+
          return ( $el.closest('[data-view]').first().attr('data-cid') == this.cid );
-         
+
       }
 
    }]);
