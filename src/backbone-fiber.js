@@ -109,6 +109,23 @@
 
          if ( _view_loading[view] )
             return _view_loading[view];
+      },
+      
+      
+      /**
+      *  Used to determine if a target is loaded
+      *  returns true if it's loading, false if it's loaded, and null if the dataview isn't even registered
+      */
+      isLoaded: function( target ) {
+         target = ( target instanceof $ ) ? target.attr( 'data-view' ) || target.closest( '[data-view]' ).attr( 'data-view' ) : target;
+         
+         if ( _view_loading[target] )
+            return false;
+         else
+            if ( _view_defs[target] )
+               return true;
+            else
+               return null;
       }
    }
 
@@ -164,6 +181,9 @@
             fizzle = true;
             inst.remove();
          }
+      } else if ( $el.closest('body').length === 0 ) {
+         fizzle = true;
+         inst.remove();
       }
 
       if (!fizzle) { inst.render(); }
@@ -256,8 +276,9 @@
       connect: function( target, options ) {
          var $el, wait,
              self = this,
-             dfd = $.Deferred();
-
+             dfd = $.Deferred(),
+             meview = null;
+             
          if ( typeof( target ) == 'string' )
             $el = this.factory( target );
          else
@@ -267,10 +288,16 @@
 
          if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) )
             wait.done(function( view ) {
-               dfd.resolveWith( self, [Fiber.getViewFromEl( $el )] );
+               if ( meview = Fiber.getViewFromEl( $el ) ) 
+                  dfd.resolveWith( self, [meview] );
+               else
+                  dfd.rejectWith( self );
             });
          else
-            dfd.resolveWith( this, [Fiber.getViewFromEl( $el )] );
+            if ( meview = Fiber.getViewFromEl( $el ) )
+               dfd.resolveWith( this, [ meview ] );
+            else
+               dfd.rejectWith( this );
 
          return dfd.promise();
       },
@@ -580,7 +607,8 @@
 
          if ( target instanceof $ ) {
 
-            view = Fiber.getViewFromEl( target );
+            if ( this.isChildLoaded( target ) )
+               view = Fiber.getViewFromEl( target );
 
          } else if ( typeof( target ) == 'string' ) {
 
@@ -598,6 +626,27 @@
          }
 
          return view;
+      },
+
+      /**
+      *  quick method for children to determine if it is loaded
+      */
+      isChildLoaded: function( target ) {
+         return Fiber.isLoaded( target );
+      },
+      
+      /**
+      * Sometimes we know an el should be a child, but it's possible it could still be loading before it's officially added
+      * this function handles the logic to remove the view if it exists otherwise it just removes the $el
+      */
+      purgeChildEl: function( el ) {
+         var $el = (el instanceof $ ? el : $(el)),
+             child;
+         
+         if ( this.isChildLoaded( $el ) && ( child = this.findChild( $el )))
+            child.remove();
+         else
+            $el.remove();
       },
       
       /**
