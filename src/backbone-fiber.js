@@ -286,7 +286,7 @@
              meview = null;
 
          if ( typeof( target ) == 'string' )
-            $el = this.factory( target );
+            $el = this.factory( target, options );
          else
             $el = (target instanceof $ ? target : $(target));
 
@@ -345,7 +345,7 @@
       *  Used by connect() to create DOM nodes.  Override to generate something
       *  different.
       */
-      factory: function( vmid ) {
+      factory: function( vmid, options ) {
          return $('<div>').attr( 'data-view', vmid ).appendTo( this.$el );
       },
 
