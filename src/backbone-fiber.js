@@ -317,18 +317,28 @@
       *
       *     Array of view names that should be children of the calling view instance.
       *
-      *  callback [ Function ]
+      *  onSuccess [ Function ]
       *
       *     Function to call once all the view have loaded.
+      *
+      *  onError [ Function ] ( optional )
+      *
+      *     Function to call if one of the views fails to load.
+      
       */
-      waitFor: function( children, callback ) {
+      waitFor: function( children, onSuccess, onError ) {
 
          var self = this,
              sync = _.compact( _.map( children, function( v ) { return Fiber.getPromise( v ); } ) );
 
-         $.when.apply( this, sync ).done( function() {
-            callback.apply( self, arguments );
-         });
+         $.when.apply( this, sync ).then( 
+            function() {
+               onSuccess.apply( self, arguments );
+            },
+            function() {
+               if ( onError ) onError.apply( self, arguments );
+            }
+         );
       },
 
       /**
