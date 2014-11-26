@@ -177,7 +177,6 @@
          if ( _view_inst[parent] ) {
             _view_inst[parent].addChild( inst );
             inst.setParent( _view_inst[parent] );
-            inst._connected = true;
          } else {
             fizzle = true;
             inst.remove();
@@ -224,7 +223,7 @@
       *  Flag used to track whether the view is still connected to the dom
       *  Useful for deferred functions to know if it still needs to run
       */
-      _connected: false,
+      _connected: true,
    
       /**
       *  load() will attach the compiled template to the
