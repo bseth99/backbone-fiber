@@ -177,6 +177,7 @@
          if ( _view_inst[parent] ) {
             _view_inst[parent].addChild( inst );
             inst.setParent( _view_inst[parent] );
+            inst._connected = true;
          } else {
             fizzle = true;
             inst.remove();
@@ -218,7 +219,13 @@
 
    Backbone.View.mix([{
 
-
+   
+      /**
+      *  Flag used to track whether the view is still connected to the dom
+      *  Useful for deferred functions to know if it still needs to run
+      */
+      _connected: false,
+   
       /**
       *  load() will attach the compiled template to the
       *  prototype of the loaded view.  No need to do anything
@@ -511,7 +518,7 @@
            _view_inst[this.parent].removeChild( this );
 
          } else {
-
+            this._connected = false;
             this.destroy();
             this.trigger('removed');
             this.stopListening();
@@ -656,7 +663,14 @@
          var $el = (el instanceof $ ? el : $(el));
 
          return ( $el.closest('[data-view]').first().attr('data-cid') == this.cid );
-
+         
+      },
+      
+      /**
+      *  Determine if still connected
+      */
+      isConnected: function() {
+         return this._connected;
       }
 
    }]);
