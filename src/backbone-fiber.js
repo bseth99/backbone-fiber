@@ -656,6 +656,14 @@
       },
 
       /**
+      *  Helper to determine if a given view is a child
+      *  There is a brief moment where the view's parent is not set, so when parent is not set we defer to the view's $el.parent being one of this views elements
+      */
+      isMyChild: function( view ) {
+         return ( view.parent && _.find( this.children, function( cid ) { return view.cid == cid; } ) !== void 0 ) || ( !view.parent && this.isMyElement( view.$el.parent() ) );
+      },
+      
+      /**
       *  quick method for children to determine if it is loaded
       */
       isChildLoaded: function( target ) {
