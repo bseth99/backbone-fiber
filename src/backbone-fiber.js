@@ -152,6 +152,10 @@
 
             delete _view_loading[target];
             dfd.resolve( view );
+         },
+         function( err ) {
+            delete _view_loading[target];
+            dfd.reject( err );
          });
       }
 
@@ -293,11 +297,13 @@
          connect( $el, options );
 
          if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) )
-            wait.done(function( view ) {
+            wait.then(function( view ) {
                if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                   dfd.resolveWith( self, [meview] );
                else
                   dfd.rejectWith( self );
+            }, function() {
+               dfd.rejectWith( self );
             });
          else
             if ( ( meview = Fiber.getViewFromEl( $el ) ) )
@@ -414,7 +420,7 @@
       */
       render: function() {
 
-         var data, isa;
+         var data, isa, self = this;
 
          if ( this.beforeRender() !== false ) {
 
@@ -429,8 +435,9 @@
                   this.$el.empty().html( this.template( data ) );
                   this.renderedOnce = true;
 
-                  this.$el.find( '[data-view]' ).each( function() {
-                     connect( this );
+                  this.$el.find( '[data-view]' ).each( function( i,el ) {
+                     $el = $(el);
+                     self.connect( $el ).fail( function() { self.trigger( 'child-connect-error', { 'data-view' : $el.attr('data-view'), '$el' : $el } ); });
                   });
                }
             }
