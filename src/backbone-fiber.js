@@ -145,13 +145,17 @@
 
          _view_loading[target] = dfd;
          require( [Fiber.viewPath + target, 'text!' + Fiber.viewPath + target + '.html'], function( view, template ) {
+            if ( view === void 0 || template === void 0 ) {
+               delete _view_loading[target];
+               dfd.reject();
+            } else {
+               view.prototype.instanceOf = target;
+               view.prototype.template = _.template( template );
+               _view_defs[target] = view;
 
-            view.prototype.instanceOf = target;
-            view.prototype.template = _.template( template );
-            _view_defs[target] = view;
-
-            delete _view_loading[target];
-            dfd.resolve( view );
+               delete _view_loading[target];
+               dfd.resolve( view );
+            }
          },
          function( err ) {
             delete _view_loading[target];
