@@ -145,13 +145,21 @@
 
          _view_loading[target] = dfd;
          require( [Fiber.viewPath + target, 'text!' + Fiber.viewPath + target + '.html'], function( view, template ) {
+            if ( view === void 0 || template === void 0 ) {
+               delete _view_loading[target];
+               dfd.reject();
+            } else {
+               view.prototype.instanceOf = target;
+               view.prototype.template = _.template( template );
+               _view_defs[target] = view;
 
-            view.prototype.instanceOf = target;
-            view.prototype.template = _.template( template );
-            _view_defs[target] = view;
-
+               delete _view_loading[target];
+               dfd.resolve( view );
+            }
+         },
+         function( err ) {
             delete _view_loading[target];
-            dfd.resolve( view );
+            dfd.reject( err );
          });
       }
 
@@ -218,7 +226,13 @@
 
    Backbone.View.mix([{
 
-
+   
+      /**
+      *  Flag used to track whether the view is still connected to the dom
+      *  Useful for deferred functions to know if it still needs to run
+      */
+      _connected: true,
+   
       /**
       *  load() will attach the compiled template to the
       *  prototype of the loaded view.  No need to do anything
@@ -280,18 +294,20 @@
              meview = null;
 
          if ( typeof( target ) == 'string' )
-            $el = this.factory( target );
+            $el = this.factory( target, options );
          else
             $el = (target instanceof $ ? target : $(target));
 
          connect( $el, options );
 
          if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) )
-            wait.done(function( view ) {
+            wait.then(function( view ) {
                if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                   dfd.resolveWith( self, [meview] );
                else
                   dfd.rejectWith( self );
+            }, function() {
+               dfd.rejectWith( self );
             });
          else
             if ( ( meview = Fiber.getViewFromEl( $el ) ) )
@@ -311,25 +327,35 @@
       *
       *     Array of view names that should be children of the calling view instance.
       *
-      *  callback [ Function ]
+      *  onSuccess [ Function ]
       *
       *     Function to call once all the view have loaded.
+      *
+      *  onError [ Function ] ( optional )
+      *
+      *     Function to call if one of the views fails to load.
+      
       */
-      waitFor: function( children, callback ) {
+      waitFor: function( children, onSuccess, onError ) {
 
          var self = this,
              sync = _.compact( _.map( children, function( v ) { return Fiber.getPromise( v ); } ) );
 
-         $.when.apply( this, sync ).done( function() {
-            callback.apply( self, arguments );
-         });
+         $.when.apply( this, sync ).then( 
+            function() {
+               onSuccess.apply( self, arguments );
+            },
+            function() {
+               if ( onError ) onError.apply( self, arguments );
+            }
+         );
       },
 
       /**
       *  Used by connect() to create DOM nodes.  Override to generate something
       *  different.
       */
-      factory: function( vmid ) {
+      factory: function( vmid, options ) {
          return $('<div>').attr( 'data-view', vmid ).appendTo( this.$el );
       },
 
@@ -398,7 +424,7 @@
       */
       render: function() {
 
-         var data, isa;
+         var data, isa, self = this;
 
          if ( this.beforeRender() !== false ) {
 
@@ -413,8 +439,9 @@
                   this.$el.empty().html( this.template( data ) );
                   this.renderedOnce = true;
 
-                  this.$el.find( '[data-view]' ).each( function() {
-                     connect( this );
+                  this.$el.find( '[data-view]' ).each( function( i,el ) {
+                     $el = $(el);
+                     self.connect( $el ).fail( function() { self.trigger( 'child-connect-error', { 'data-view' : $el.attr('data-view'), '$el' : $el } ); });
                   });
                }
             }
@@ -511,7 +538,7 @@
            _view_inst[this.parent].removeChild( this );
 
          } else {
-
+            this._connected = false;
             this.destroy();
             this.trigger('removed');
             this.stopListening();
@@ -629,6 +656,14 @@
       },
 
       /**
+      *  Helper to determine if a given view is a child
+      *  There is a brief moment where the view's parent is not set, so when parent is not set we defer to the view's $el.parent being one of this views elements
+      */
+      isMyChild: function( view ) {
+         return ( view.parent && _.find( this.children, function( cid ) { return view.cid == cid; } ) !== void 0 ) || ( !view.parent && this.isMyElement( view.$el.parent() ) );
+      },
+      
+      /**
       *  quick method for children to determine if it is loaded
       */
       isChildLoaded: function( target ) {
@@ -656,7 +691,14 @@
          var $el = (el instanceof $ ? el : $(el));
 
          return ( $el.closest('[data-view]').first().attr('data-cid') == this.cid );
-
+         
+      },
+      
+      /**
+      *  Determine if still connected
+      */
+      isConnected: function() {
+         return this._connected;
       }
 
    }]);
