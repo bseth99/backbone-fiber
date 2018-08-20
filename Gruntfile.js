@@ -20,23 +20,13 @@ grunt.initConfig({
 
    uglify: {
       "backbone-fiber.min.js": [ "<banner>", "backbone-fiber.js" ]
-   },
-
-   jshint: {
-      options: {
-         jshintrc: ".jshintrc"
-      },
-      files: {
-        src: [ "src/backbone-fiber.js" ]
-      }
    }
 
 });
 
-grunt.loadNpmTasks( "grunt-contrib-jshint" );
 grunt.loadNpmTasks( "grunt-contrib-uglify" );
 grunt.loadNpmTasks( "grunt-contrib-concat" );
 
-grunt.registerTask( "default", [ "jshint", "concat", "uglify" ] );
+grunt.registerTask( "default", [ "concat", "uglify" ] );
 
 };
