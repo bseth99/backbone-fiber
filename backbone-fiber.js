@@ -315,7 +315,7 @@
 
          connect( $el, options );
 
-         if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) )
+         if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) ) {
             wait.done(function( view ) {
                if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                   dfd.resolveWith( self, [meview] );
@@ -325,12 +325,12 @@
             wait.fail(function() {
                dfd.rejectWith( self );
             });
-         else
+         } else {
             if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                dfd.resolveWith( this, [ meview ] );
             else
                dfd.rejectWith( this );
-
+         }
          return dfd.promise();
       },
 
