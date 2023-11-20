@@ -138,7 +138,8 @@
 
       var dfd = $.Deferred();
 
-      dfd.then(function() { delete _view_loading[target]; }, function() { delete _view_loading[target]; } );
+      dfd.done( function() { delete _view_loading[target]; } );
+      dfd.fail( function() { delete _view_loading[target]; } );
 
       if ( _view_defs[target] ) {
 
@@ -174,11 +175,13 @@
 
       var dfd = $.Deferred();
 
-      dfd.then(function() { delete _view_creating[dataView]; }, function() { delete _view_creating[dataView]; } );
+      dfd.done( function() { delete _view_creating[dataView]; } );
+      dfd.fail( function() { delete _view_creating[dataView]; } );
 
       _view_creating[dataView] = dfd;
 
-      load( dataView ).then( function( view ) {
+      var dvdfd = load( dataView );
+      dvdfd.done( function( view ) {
 
          var inst = new view(_.extend( options, { el: $el[0] } )),
              parent, fizzle = false;
@@ -209,7 +212,8 @@
             dfd.reject();
          }
 
-      }, function() { dfd.reject(); } );
+      });
+      dvdfd.fail( function() { dfd.reject(); } );
 
    }
 
@@ -312,12 +316,13 @@
          connect( $el, options );
 
          if ( ( wait = Fiber.getPromise( $el.attr('data-view') ) ) )
-            wait.then(function( view ) {
+            wait.done(function( view ) {
                if ( ( meview = Fiber.getViewFromEl( $el ) ) )
                   dfd.resolveWith( self, [meview] );
                else
                   dfd.rejectWith( self );
-            }, function() {
+            });
+            wait.fail(function() {
                dfd.rejectWith( self );
             });
          else
@@ -352,11 +357,12 @@
          var self = this,
              sync = _.compact( _.map( children, function( v ) { return Fiber.getPromise( v ); } ) );
 
-         $.when.apply( this, sync ).then(
+         var pr = $.when.apply( this, sync );
+         pr.done(
             function() {
                onSuccess.apply( self, arguments );
-            },
-            function() {
+            });
+         pr.fail( function() {
                if ( onError ) onError.apply( self, arguments );
             }
          );
